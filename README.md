@@ -4,7 +4,7 @@ Landing page internacional da Conviva para campanhas de aquisição fora do Bras
 
 ## Recursos
 
-- Rotas estáticas em inglês, alemão, espanhol e português
+- Rotas localizadas em português, inglês, espanhol, alemão, francês, italiano, japonês e chinês simplificado
 - Detecção automática pelo idioma do navegador na raiz
 - Seletor manual com preferência persistida no navegador
 - SEO localizado, Open Graph, `hreflang`, sitemap e robots
