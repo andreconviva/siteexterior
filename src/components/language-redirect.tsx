@@ -6,13 +6,18 @@ import { useEffect } from "react";
 import { locales, type Locale } from "@/lib/i18n";
 
 const detectLocale = (): Locale => {
-  const saved = window.localStorage.getItem("conviva-locale");
-  if (saved && locales.includes(saved as Locale)) return saved as Locale;
+  // The root address follows the visitor's browser language. Explicit locale
+  // routes (for example /pt-BR) remain stable, so this only runs at `/`.
   const language = (navigator.languages?.[0] || navigator.language || "en").toLowerCase();
   if (language.startsWith("pt")) return "pt-BR";
   if (language.startsWith("zh")) return "zh-CN";
   const prefix = language.split("-")[0] as Locale;
-  return locales.includes(prefix) ? prefix : "en";
+  if (locales.includes(prefix)) return prefix;
+
+  // Keep a manually selected language as a fallback only when the browser
+  // language is not one of the site's supported locales.
+  const saved = window.localStorage.getItem("conviva-locale");
+  return saved && locales.includes(saved as Locale) ? saved as Locale : "en";
 };
 
 export function LanguageRedirect() {
