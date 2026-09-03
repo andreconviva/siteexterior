@@ -14,10 +14,7 @@ const detectLocale = (): Locale => {
   const prefix = language.split("-")[0] as Locale;
   if (locales.includes(prefix)) return prefix;
 
-  // Keep a manually selected language as a fallback only when the browser
-  // language is not one of the site's supported locales.
-  const saved = window.localStorage.getItem("conviva-locale");
-  return saved && locales.includes(saved as Locale) ? saved as Locale : "en";
+  return "en";
 };
 
 export function LanguageRedirect() {
