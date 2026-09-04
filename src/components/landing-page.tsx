@@ -14,7 +14,7 @@ export function LandingPage({ locale, copy }: { locale: Locale; copy: Dictionary
       <SiteHeader locale={locale} nav={copy.nav} />
       <main>
         <section className="hero" aria-labelledby="hero-title">
-          <Image className="hero-image" src="/images/residences/brise-1.webp" alt={copy.residences[0].alt} fill priority sizes="100vw" />
+          <Image className="hero-image" src="/images/hero-sunset-niteroi.webp" alt={copy.hero.note} fill priority sizes="100vw" />
           <div className="hero-shade" />
           <div className="hero-content page-width">
             <p className="hero-note">{copy.hero.note}</p>
