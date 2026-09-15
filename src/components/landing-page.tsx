@@ -37,6 +37,10 @@ export function LandingPage({ locale, copy }: { locale: Locale; copy: Dictionary
           <div className="page-width place-profiles">
             {copy.discover.profiles.map((item, index) => <Reveal key={item.title} className="place-profile" delay={index * 0.05}><h3>{item.title}</h3><p>{item.text}</p></Reveal>)}
           </div>
+          {copy.discover.articles?.length ? <div className="page-width discover-growth">
+            <Reveal className="growth-copy"><p className="eyebrow">{copy.discover.growthTitle}</p><p>{copy.discover.growthText}</p></Reveal>
+            <div className="article-list">{copy.discover.articles.map((article, index) => <Reveal key={article.href} className="article-card" delay={index * 0.05}><p className="article-source">{article.source}</p><a href={article.href} target="_blank" rel="noreferrer">{article.title}<span aria-hidden="true">↗</span></a></Reveal>)}</div>
+          </div> : null}
         </section>
 
         <section className="reasons-section section-pad" aria-labelledby="reasons-title">

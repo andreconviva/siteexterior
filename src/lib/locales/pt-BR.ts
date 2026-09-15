@@ -3,11 +3,16 @@ import type { LocalePack } from "../content-types";
 export const ptBR: LocalePack = {
   meta: { title: "Conviva | Invista perto do Rio e tenha seu lugar no Brasil", description: "Conheça imóveis contemporâneos em Niterói para investir e aproveitar suas temporadas no Brasil." },
   nav: { residences: "Oportunidades", location: "Descubra Niterói", why: "Por que Conviva", contact: "Solicitar detalhes", menu: "Abrir menu", close: "Fechar menu", language: "Idioma" },
-  hero: { note: "Niterói, diante do Rio de Janeiro", title: "Invista perto do Rio. Tenha o seu lugar no Brasil.", text: "Imóveis contemporâneos em Niterói para construir patrimônio e aproveitar suas férias.", cta: "Conhecer oportunidades" },
+  hero: { note: "15 minutos do Rio", title: "Invista no Brasil. Ganhe com o paraíso.", text: "Imóveis contemporâneos em Niterói para construir patrimônio e aproveitar suas férias.", cta: "Conhecer oportunidades" },
   discover: {
     title: "O Rio no horizonte. Niterói aos seus pés.",
-    text: "Uma cidade costeira com praias, natureza, cultura e serviços, conectada à região metropolitana do Rio e com uma rotina mais tranquila.",
+    text: "Uma cidade costeira com praias, natureza, cultura e serviços, conectada à região metropolitana do Rio e com uma rotina mais tranquila. Niterói cresce como destino conectado, com investimentos em infraestrutura, sustentabilidade e renovação urbana.",
     city: "Niterói", rio: "Rio de Janeiro", connection: "Em lados opostos da Baía de Guanabara",
+    growthTitle: "Uma cidade em transformação", growthText: "Planejamento de longo prazo, nova infraestrutura e uma economia costeira resiliente estão desenhando o próximo capítulo de Niterói — uma cidade com forte apelo de estilo de vida e investimento contínuo no futuro.", articles: [
+      { title: "Niterói lança plano estratégico até 2050 com foco em inovação e qualidade de vida", source: "SEPLAG Niterói", href: "https://seplag.niteroi.rj.gov.br/niteroi-lanca-plano-estrategico-ate-2050-com-foco-em-inovacao-inclusao-social-e-qualidade-de-vida/" },
+      { title: "BNDES aprova R$ 104,6 milhões para infraestrutura verde e resiliência climática", source: "Agência BNDES de Notícias", href: "https://agenciadenoticias.bndes.gov.br/cop30/BNDES-anuncia-financiamento-de-R%24-1046-milhoes-para-ampliar-infraestrutura-verde-e-resiliencia-climatica-em-Niteroi/" },
+      { title: "Niterói avança na transformação do Centro da cidade", source: "Prefeitura de Niterói", href: "https://niteroi.rj.gov.br/prefeitura-de-niteroi-da-passo-decisivo-para-transformacao-do-centro-com-assinatura-do-fundo-de-desenvolvimento-imobiliario/" },
+    ],
     profiles: [
       { title: "Urbano e conectado", text: "Ingá e Icaraí aproximam praia, cultura e serviços." },
       { title: "Praia e tranquilidade", text: "Camboinhas e Piratininga oferecem uma atmosfera residencial perto do mar." },

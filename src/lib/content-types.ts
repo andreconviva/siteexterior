@@ -16,12 +16,13 @@ export const residenceSlugs = [
 export type ResidenceSlug = (typeof residenceSlugs)[number];
 export type ResidenceStatus = "current" | "completed";
 export type Item = { title: string; text: string };
+export type Article = { title: string; source: string; href: string };
 
 export type LocalePack = {
   meta: { title: string; description: string };
   nav: { residences: string; location: string; why: string; contact: string; menu: string; close: string; language: string };
   hero: { note: string; title: string; text: string; cta: string };
-  discover: { title: string; text: string; city: string; rio: string; connection: string; profiles: readonly Item[] };
+  discover: { title: string; text: string; city: string; rio: string; connection: string; profiles: readonly Item[]; growthTitle?: string; growthText?: string; articles?: readonly Article[] };
   reasons: { title: string; items: readonly Item[] };
   portfolio: { title: string; current: string; completed: string; view: string; currentStatus: string; completedStatus: string };
   journey: { title: string; text: string; items: readonly Item[] };
