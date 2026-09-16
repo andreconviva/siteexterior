@@ -10,7 +10,7 @@ export const ptBR: LocalePack = {
     city: "Niterói", rio: "Rio de Janeiro", connection: "Em lados opostos da Baía de Guanabara",
     growthTitle: "Uma cidade em transformação", growthText: "Planejamento de longo prazo, nova infraestrutura e uma economia costeira resiliente estão desenhando o próximo capítulo de Niterói — uma cidade com forte apelo de estilo de vida e investimento contínuo no futuro.", articles: [
       { title: "Niterói lança plano estratégico até 2050 com foco em inovação e qualidade de vida", source: "SEPLAG Niterói", href: "https://seplag.niteroi.rj.gov.br/niteroi-lanca-plano-estrategico-ate-2050-com-foco-em-inovacao-inclusao-social-e-qualidade-de-vida/" },
-      { title: "BNDES aprova R$ 104,6 milhões para infraestrutura verde e resiliência climática", source: "Agência BNDES de Notícias", href: "https://agenciadenoticias.bndes.gov.br/cop30/BNDES-anuncia-financiamento-de-R%24-1046-milhoes-para-ampliar-infraestrutura-verde-e-resiliencia-climatica-em-Niteroi/" },
+      { title: "Niterói: paisagens deslumbrantes, gastronomia à beira-mar e cultura vibrante", source: "Visit Brasil · Embratur", href: "https://visitbrasil.com/explorando-os-destinos-de-vela-no-brasil-uma-aventura-imperdivel/" },
       { title: "Niterói avança na transformação do Centro da cidade", source: "Prefeitura de Niterói", href: "https://niteroi.rj.gov.br/prefeitura-de-niteroi-da-passo-decisivo-para-transformacao-do-centro-com-assinatura-do-fundo-de-desenvolvimento-imobiliario/" },
     ],
     profiles: [

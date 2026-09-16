@@ -9,10 +9,18 @@ import { localeNames, locales } from "@/lib/i18n";
 
 export function SiteHeader({ locale, nav }: { locale: Locale; nav: Dictionary["nav"] }) {
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => { document.documentElement.lang = locale; }, [locale]);
+
+  useEffect(() => {
+    const update = () => setScrolled(window.scrollY > 24);
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
 
   const switchLanguage = (nextLocale: Locale) => {
     window.localStorage.setItem("conviva-locale", nextLocale);
@@ -23,7 +31,7 @@ export function SiteHeader({ locale, nav }: { locale: Locale; nav: Dictionary["n
   };
 
   return (
-    <header className="site-header">
+    <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
       <Link className="brand" href={`/${locale}`} aria-label="Conviva"><Image src="/images/conviva-logo.svg" alt="Conviva" width={158} height={39} priority /></Link>
       <button className="menu-button" type="button" aria-expanded={open} aria-controls="site-navigation" aria-label={open ? nav.close : nav.menu} onClick={() => setOpen(!open)}><span /><span /></button>
       <div id="site-navigation" className={`nav-shell ${open ? "is-open" : ""}`}>

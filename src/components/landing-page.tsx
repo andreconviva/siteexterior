@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Dictionary, Locale, Residence } from "@/lib/i18n";
 import { ContactForm } from "./contact-form";
+import { countryOptions } from "@/lib/international-form";
 import { Reveal } from "./reveal";
 import { SiteHeader } from "./site-header";
 
@@ -92,7 +93,7 @@ export function LandingPage({ locale, copy }: { locale: Locale; copy: Dictionary
         <section className="contact-section section-pad" id="contact" aria-labelledby="contact-title">
           <div className="page-width contact-grid">
             <Reveal className="contact-copy"><h2 id="contact-title">{copy.contact.title}</h2><p>{copy.contact.text}</p></Reveal>
-            <Reveal className="contact-form-wrap" delay={0.08}><ContactForm copy={copy.contact} locale={locale} residences={copy.residences} /></Reveal>
+            <Reveal className="contact-form-wrap" delay={0.08}><ContactForm copy={copy.contact} locale={locale} residences={copy.residences} countries={countryOptions(locale)} /></Reveal>
           </div>
         </section>
       </main>
