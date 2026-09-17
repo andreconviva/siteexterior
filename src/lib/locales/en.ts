@@ -10,7 +10,7 @@ export const en: LocalePack = {
     { title: "Niterói advances the transformation of its city center", source: "Niterói City Hall", href: "https://niteroi.rj.gov.br/prefeitura-de-niteroi-da-passo-decisivo-para-transformacao-do-centro-com-assinatura-do-fundo-de-desenvolvimento-imobiliario/" },
   ], profiles: [
     { title: "Urban and connected", text: "Ingá and Icaraí bring beaches, culture and services together." },
-    { title: "Beach and calm", text: "Camboinhas and Piratininga offer a residential atmosphere by the sea." },
+    { title: "Beach, peace and quality of life", text: "Camboinhas and Piratininga offer a residential atmosphere by the sea." },
     { title: "Nature and holidays", text: "Itacoatiara combines ocean, mountains and preserved scenery." },
   ] },
   reasons: { title: "An investment that is also part of your life.", items: [

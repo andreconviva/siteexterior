@@ -20,7 +20,7 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; overflow-x: hidden; background: var(--bg); color: var(--ink); font-family: var(--body); -webkit-font-smoothing: antialiased; }
+body { margin: 0; overflow-x: clip; background: var(--bg); color: var(--ink); font-family: var(--body); -webkit-font-smoothing: antialiased; }
 button, input, select, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 a { color: inherit; text-decoration: none; }
@@ -74,9 +74,25 @@ h2 { margin-bottom: 0; font-family: var(--display); font-size: clamp(2.65rem, 5.
 .hero-image { object-fit: cover; object-position: center; animation: hero-arrive 1.1s cubic-bezier(.16, 1, .3, 1) both; }
 .hero-shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(4, 17, 15, .86) 0%, rgba(4, 17, 15, .42) 52%, rgba(4, 17, 15, .08) 100%), linear-gradient(0deg, rgba(4, 17, 15, .55), transparent 54%); }
 .hero-content, .residence-hero-content { position: relative; z-index: 1; padding-top: 96px; padding-bottom: clamp(54px, 8vh, 92px); }
+.hero-content { align-self: stretch; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end; }
 .hero-note, .residence-hero-content > p:first-of-type { margin-bottom: 20px; font-size: .72rem; font-weight: 720; letter-spacing: .1em; text-transform: uppercase; }
 .hero h1, .residence-hero h1 { max-width: 970px; margin-bottom: 20px; font-family: var(--display); font-size: clamp(3.5rem, 6.6vw, 7.2rem); font-stretch: condensed; font-weight: 450; letter-spacing: -.062em; line-height: .91; }
+.hero h1 { margin-left: -.06em; }
 .hero-text, .residence-summary { max-width: 600px; margin-bottom: 28px; font-size: clamp(1rem, 1.35vw, 1.2rem); line-height: 1.55; }
+.hero-scroll { position: relative; }
+.hero-scroll::after { content: ""; display: block; height: 90svh; }
+.hero-scroll .hero { --dawn: 0; --hero-copy-opacity: 1; --hero-copy-y: 0px; position: sticky; top: var(--hero-sticky-top, 0px); isolation: isolate; }
+.hero-photo { position: absolute; inset: 0; }
+.hero-scroll .hero-image { filter: brightness(calc(1 + var(--dawn) * .18)) saturate(calc(1 + var(--dawn) * .08)); }
+.hero-daylight, .hero-sunlight { position: absolute; inset: 0; pointer-events: none; opacity: var(--dawn); }
+.hero-daylight { background: linear-gradient(180deg, rgba(132, 202, 239, .72), rgba(187, 222, 235, .38) 26%, rgba(255, 234, 188, .12) 44%, transparent 62%); mix-blend-mode: screen; }
+.hero-sunlight { background: radial-gradient(ellipse at 24% 38%, rgba(255, 228, 160, .38), rgba(255, 236, 196, .12) 35%, transparent 68%); mix-blend-mode: screen; }
+.hero-scroll .hero-shade { opacity: calc(1 - var(--dawn)); pointer-events: none; }
+.hero-scroll .hero-content { opacity: var(--hero-copy-opacity); transform: translateY(var(--hero-copy-y)); }
+.hero-scroll .hero[data-copy-hidden] .hero-content { pointer-events: none; }
+/* Keep a focused call to action legible if someone scrolls with the keyboard. */
+.hero-scroll .hero-content:focus-within { opacity: 1; transform: none; }
+.hero-scroll .hero:has(.hero-content:focus-within) .hero-shade { opacity: 1; }
 .back-link { display: inline-block; margin-bottom: 48px; font-size: .75rem; font-weight: 700; }
 
 .discover-grid { display: grid; grid-template-columns: .82fr 1.18fr; gap: clamp(52px, 8vw, 120px); align-items: center; }
@@ -136,12 +152,14 @@ h2 { margin-bottom: 0; font-family: var(--display); font-size: clamp(2.65rem, 5.
 .completed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 36px 24px; }
 .completed-grid .residence-card { grid-column: auto; }
 .completed-grid .residence-image { aspect-ratio: 1.15; }
+.completed-grid .residence-card:first-child .residence-image { aspect-ratio: 1.05; }
 
 .vertical-heading { max-width: 900px; margin-bottom: 72px; }
 .vertical-heading h2 { margin-bottom: 26px; }
 .vertical-heading p { max-width: 660px; margin-bottom: 0; color: var(--muted); line-height: 1.7; }
 .journey-line { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); }
 .journey-item { min-height: 230px; padding: 32px 26px 14px 0; border-right: 1px solid var(--line); }
+.journey-item:first-child { padding-left: 26px; }
 .journey-item + .journey-item { padding-left: 26px; }
 .journey-item:last-child { border-right: 0; }
 .journey-item h3 { margin: 24px 0 12px; font-family: var(--display); font-size: 1.7rem; font-weight: 500; }
@@ -267,6 +285,7 @@ h2 { margin-bottom: 0; font-family: var(--display); font-size: clamp(2.65rem, 5.
   .site-header { height: 68px; padding-inline: 18px; }
   .brand img { width: 122px; }
   .nav-shell { inset: 68px 0 auto 0; min-height: calc(100dvh - 68px); }
+  .hero-scroll::after { height: 70svh; }
   .hero-shade { background: linear-gradient(0deg, rgba(4,17,15,.9) 0%, rgba(4,17,15,.2) 92%); }
   .hero-content, .residence-hero-content { padding-top: 88px; padding-bottom: 46px; }
   .hero h1, .residence-hero h1 { font-size: clamp(3rem, 13.8vw, 4.8rem); line-height: .92; }
@@ -290,6 +309,7 @@ h2 { margin-bottom: 0; font-family: var(--display); font-size: clamp(2.65rem, 5.
   .completed-grid { grid-template-columns: 1fr; gap: 54px; }
   .journey-line { grid-template-columns: 1fr; border-top: 0; }
   .journey-item, .journey-item + .journey-item { min-height: 0; padding: 26px 0; border-top: 1px solid var(--line); border-right: 0; }
+  .journey-item:first-child { padding-left: 0; }
   .conviva-section, .location-band { min-height: 650px; }
   .conviva-content { grid-template-columns: 1fr; gap: 42px; padding-bottom: 54px; }
   .contact-section.section-pad { padding-block: 28px; scroll-margin-top: 68px; }
@@ -321,5 +341,10 @@ h2 { margin-bottom: 0; font-family: var(--display); font-size: clamp(2.65rem, 5.
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .hero-scroll::after { display: none; }
+  .hero-scroll .hero { position: relative; top: auto; }
+  .hero-scroll .hero-image { filter: none; }
+  .hero-scroll .hero-daylight, .hero-scroll .hero-sunlight { display: none; }
+  .hero-scroll .hero-shade, .hero-scroll .hero-content { opacity: 1; transform: none; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

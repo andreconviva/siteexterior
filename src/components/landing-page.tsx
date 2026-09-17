@@ -5,6 +5,7 @@ import { ContactForm } from "./contact-form";
 import { countryOptions } from "@/lib/international-form";
 import { Reveal } from "./reveal";
 import { SiteHeader } from "./site-header";
+import { HeroDawn } from "./hero-dawn";
 
 export function LandingPage({ locale, copy }: { locale: Locale; copy: Dictionary }) {
   const current = copy.residences.filter((item) => item.status === "current");
@@ -14,16 +15,20 @@ export function LandingPage({ locale, copy }: { locale: Locale; copy: Dictionary
     <>
       <SiteHeader locale={locale} nav={copy.nav} />
       <main>
-        <section className="hero" aria-labelledby="hero-title">
-          <Image className="hero-image" src="/images/hero-sunset-niteroi.webp" alt={copy.hero.note} fill priority sizes="100vw" />
-          <div className="hero-shade" />
-          <div className="hero-content page-width">
-            <p className="hero-note">{copy.hero.note}</p>
-            <h1 id="hero-title">{copy.hero.title}</h1>
-            <p className="hero-text">{copy.hero.text}</p>
-            <a className="button button-light" href="#residences">{copy.hero.cta}<span aria-hidden="true">↓</span></a>
-          </div>
-        </section>
+        <HeroDawn>
+          <section className="hero" aria-labelledby="hero-title">
+            <div className="hero-photo"><Image className="hero-image" src="/images/hero-sunset-niteroi.webp" alt={copy.hero.note} fill priority sizes="100vw" /></div>
+            <div className="hero-daylight" aria-hidden="true" />
+            <div className="hero-sunlight" aria-hidden="true" />
+            <div className="hero-shade" aria-hidden="true" />
+            <div className="hero-content page-width">
+              <p className="hero-note">{copy.hero.note}</p>
+              <h1 id="hero-title">{copy.hero.title}</h1>
+              <p className="hero-text">{copy.hero.text}</p>
+              <a className="button button-light" href="#residences">{copy.hero.cta}<span aria-hidden="true">↓</span></a>
+            </div>
+          </section>
+        </HeroDawn>
 
         <section className="discover section-pad" id="location" aria-labelledby="discover-title">
           <div className="page-width discover-grid">
@@ -32,7 +37,7 @@ export function LandingPage({ locale, copy }: { locale: Locale; copy: Dictionary
               <p>{copy.discover.text}</p>
             </Reveal>
             <Reveal className="place-visual" delay={0.08}>
-              <div className="coast-image"><Image src="/images/niteroi-coast.jpg" alt={`${copy.discover.city}, Brasil`} fill sizes="(max-width: 760px) 100vw, 50vw" /></div>
+              <div className="coast-image"><Image src="/images/praia.png" alt={`${copy.discover.city}, Brasil`} fill sizes="(max-width: 760px) 100vw, 50vw" /></div>
             </Reveal>
           </div>
           <div className="page-width place-profiles">
