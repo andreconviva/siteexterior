@@ -22,7 +22,12 @@ export function ContactForm({ copy, locale, residences, countries, selectedResid
   const [countryActiveIndex, setCountryActiveIndex] = useState(0);
   const autoCountryInitialized = useRef(false);
   const [phone, setPhone] = useState("");
+  const [preferredLanguage, setPreferredLanguage] = useState<Locale>(locale);
+  const [residenceSlug, setResidenceSlug] = useState(selectedResidence || "");
+  const [objective, setObjective] = useState("");
   const [budget, setBudget] = useState("");
+  const [timeline, setTimeline] = useState("");
+  const [messageText, setMessageText] = useState("");
   const [quote, setQuote] = useState<{ currency: string; rate: number; date: string | null; failed?: boolean }>({ currency: "BRL", rate: 1, date: null });
   const international = internationalCopy[locale];
   const budgetHintId = useId();
@@ -74,24 +79,32 @@ export function ContactForm({ copy, locale, residences, countries, selectedResid
     const parsedPhone = parsePhoneNumberFromString(phone, country || undefined);
     const phoneInput = form.elements.namedItem("phone") as HTMLInputElement;
     phoneInput.setCustomValidity(parsedPhone?.isPossible() ? "" : international.phoneError);
-    const countryInput = form.elements.namedItem("country-search") as HTMLInputElement;
+    const countryInput = form.querySelector('[role="combobox"]') as HTMLInputElement;
     countryInput.setCustomValidity(country ? "" : copy.select);
     if (!form.checkValidity()) { form.reportValidity(); return; }
     if (rateLoading) return;
     setState("sending");
     const data = Object.fromEntries(new FormData(form).entries());
     const query = new URLSearchParams(window.location.search);
-    const residence = residences.find((item) => item.slug === data.residence);
+    const residence = residences.find((item) => item.slug === residenceSlug);
     const selectedBudget = options.find((item) => item.id === budget);
     const countryName = countries.find((item) => item.code === country)?.name || country;
+    const crmDetails = [
+      `${copy.country}: ${countryName}`,
+      `${copy.language}: ${localeNames[preferredLanguage]}`,
+      `${copy.objective}: ${objective}`,
+      `${copy.budget}: ${selectedBudget?.label || ""}`,
+      `${copy.timeline}: ${timeline}`,
+      `${copy.message}: ${messageText || "-"}`,
+    ].join("\n");
     const attribution = Object.fromEntries(["source", "medium", "campaign", "content", "term"].map((key) => [`utm_${key}`, query.get(`utm_${key}`) || ""]));
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, ...attribution, country: countryName, countryCode: country, phone: parsedPhone!.number, budget: selectedBudget?.label, budgetBand: budget, budgetCurrency: displayCurrency, budgetBaseCurrency: "BRL", budgetMinBRL: selectedBudget?.min, budgetMaxBRL: selectedBudget?.max, exchangeRate: rate, exchangeRateDate: displayCurrency === "BRL" ? null : quote.date, locale, residenceStatus: residence?.status || "", originUrl: window.location.href, referrer: document.referrer, submittedAt: new Date().toISOString(), formVersion: "international-v2" }),
+        body: JSON.stringify({ ...data, ...attribution, country: countryName, countryCode: country, phone: parsedPhone!.number, preferredLanguage, residence: residenceSlug, objective, budget: selectedBudget?.label, budgetBand: budget, timeline, message: crmDetails, budgetCurrency: displayCurrency, budgetBaseCurrency: "BRL", budgetMinBRL: selectedBudget?.min, budgetMaxBRL: selectedBudget?.max, exchangeRate: rate, exchangeRateDate: displayCurrency === "BRL" ? null : quote.date, locale, residenceStatus: residence?.status || "", originUrl: window.location.href, referrer: document.referrer, submittedAt: new Date().toISOString(), formVersion: "international-v2" }),
       });
-      if (response.ok) { setState("success"); form.reset(); setCountry(""); setCountryQuery(""); setPhone(""); setBudget(""); }
+      if (response.ok) { setState("success"); form.reset(); setCountry(""); setCountryQuery(""); setPhone(""); setPreferredLanguage(locale); setResidenceSlug(""); setObjective(""); setBudget(""); setTimeline(""); setMessageText(""); }
       else { const result = await response.json().catch(() => null); setState(result?.error === "contact_unavailable" ? "unavailable" : "error"); }
     } catch { setState("error"); }
   }
@@ -104,7 +117,7 @@ export function ContactForm({ copy, locale, residences, countries, selectedResid
         <label>{copy.name}<input name="name" autoComplete="name" minLength={2} required /></label>
         <label>{copy.email}<input name="email" type="email" autoComplete="email" required /></label>
         <label className="country-field">{copy.country}<div className="country-combobox">
-          <input name="country-search" type="text" role="combobox" aria-autocomplete="list" aria-controls="country-options" aria-expanded={countryOpen} autoComplete="country-name" placeholder={copy.select} value={countryQuery} required onFocus={() => { setCountryOpen(true); setCountryActiveIndex(0); }} onBlur={(event) => {
+          <input type="text" role="combobox" aria-autocomplete="list" aria-controls="country-options" aria-expanded={countryOpen} autoComplete="country-name" placeholder={copy.select} value={countryQuery} required onFocus={() => { setCountryOpen(true); setCountryActiveIndex(0); }} onBlur={(event) => {
             window.setTimeout(() => setCountryOpen(false), 120);
             if (!country) event.currentTarget.setCustomValidity(copy.select);
           }} onChange={(event) => {
@@ -125,8 +138,7 @@ export function ContactForm({ copy, locale, residences, countries, selectedResid
             if (event.key === "Enter" && filteredCountries[countryActiveIndex]) { event.preventDefault(); const nextCountry = filteredCountries[countryActiveIndex]; setCountry(nextCountry.code); setCountryQuery(nextCountry.name); setPhone(`+${getCountryCallingCode(nextCountry.code)}`); setCountryOpen(false); event.currentTarget.setCustomValidity(""); }
             if (event.key === "Escape") setCountryOpen(false);
           }} />
-          <input type="hidden" name="country" value={country} />
-          {countryOpen && filteredCountries.length > 0 && <div className="country-options" id="country-options" role="listbox">{filteredCountries.slice(0, 12).map((item, index) => <button type="button" role="option" aria-selected={item.code === country} className={index === countryActiveIndex ? "is-active" : ""} key={item.code} onMouseDown={(event) => event.preventDefault()} onClick={(event) => { const input = event.currentTarget.form?.elements.namedItem("country-search") as HTMLInputElement | null; setCountry(item.code); setCountryQuery(item.name); setPhone(`+${getCountryCallingCode(item.code)}`); setCountryOpen(false); input?.setCustomValidity(""); }}>{item.name}</button>)}</div>}
+          {countryOpen && filteredCountries.length > 0 && <div className="country-options" id="country-options" role="listbox">{filteredCountries.slice(0, 12).map((item, index) => <button type="button" role="option" aria-selected={item.code === country} className={index === countryActiveIndex ? "is-active" : ""} key={item.code} onMouseDown={(event) => event.preventDefault()} onClick={(event) => { const input = event.currentTarget.closest("form")?.querySelector('[role="combobox"]') as HTMLInputElement | null; setCountry(item.code); setCountryQuery(item.name); setPhone(`+${getCountryCallingCode(item.code)}`); setCountryOpen(false); input?.setCustomValidity(""); }}>{item.name}</button>)}</div>}
         </div></label>
         <label>{copy.phone}<input name="phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} placeholder={phonePlaceholder} disabled={!country} required maxLength={32} onChange={(event) => {
           event.currentTarget.setCustomValidity("");
@@ -138,13 +150,14 @@ export function ContactForm({ copy, locale, residences, countries, selectedResid
           event.currentTarget.setCustomValidity(parsed?.isPossible() ? "" : international.phoneError);
           if (parsed?.isPossible()) setPhone(parsed.formatInternational());
         }} /></label>
-        <label>{copy.language}<select name="preferredLanguage" required defaultValue={locale}>{locales.map((item) => <option key={item} value={item}>{localeNames[item]}</option>)}</select></label>
-        <label>{copy.residence}<select name="residence" required defaultValue={selectedResidence || ""}><option value="">{copy.select}</option>{residences.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}</select></label>
-        <label>{copy.objective}<select name="objective" required defaultValue=""><option value="">{copy.select}</option>{copy.objectives.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
-        <label>{copy.budget} ({rateLoading ? currency : displayCurrency})<select name="budget" required value={budget} onChange={(event) => setBudget(event.target.value)} disabled={!country || rateLoading} aria-describedby={budgetHintId}><option value="">{rateLoading ? international.loading : copy.select}</option>{options.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span id={budgetHintId} className="field-hint" role="status">{rateLoading ? international.loading : rateFailed ? international.fallback : displayCurrency !== "BRL" && quote.date ? `${international.estimate} ${new Intl.DateTimeFormat(locale, { timeZone: "UTC" }).format(new Date(`${quote.date}T00:00:00Z`))}` : ""}</span></label>
-        <label>{copy.timeline}<select name="timeline" defaultValue=""><option value="">{copy.select}</option>{copy.timelines.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
-        <label>{copy.message}<textarea name="message" rows={2} maxLength={2000} /></label>
+        <label>{copy.language}<select required value={preferredLanguage} onChange={(event) => setPreferredLanguage(event.target.value as Locale)}>{locales.map((item) => <option key={item} value={item}>{localeNames[item]}</option>)}</select></label>
+        <label>{copy.residence}<select required value={residenceSlug} onChange={(event) => setResidenceSlug(event.target.value)}><option value="">{copy.select}</option>{residences.map((item) => <option key={item.slug} value={item.slug}>{item.name}</option>)}</select></label>
+        <label>{copy.objective}<select required value={objective} onChange={(event) => setObjective(event.target.value)}><option value="">{copy.select}</option>{copy.objectives.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+        <label>{copy.budget} ({rateLoading ? currency : displayCurrency})<select required value={budget} onChange={(event) => setBudget(event.target.value)} disabled={!country || rateLoading} aria-describedby={budgetHintId}><option value="">{rateLoading ? international.loading : copy.select}</option>{options.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select><span id={budgetHintId} className="field-hint" role="status">{rateLoading ? international.loading : rateFailed ? international.fallback : displayCurrency !== "BRL" && quote.date ? `${international.estimate} ${new Intl.DateTimeFormat(locale, { timeZone: "UTC" }).format(new Date(`${quote.date}T00:00:00Z`))}` : ""}</span></label>
+        <label>{copy.timeline}<select required value={timeline} onChange={(event) => setTimeline(event.target.value)}><option value="">{copy.select}</option>{copy.timelines.map((item) => <option key={item} value={item}>{item}</option>)}</select></label>
+        <label>{copy.message}<textarea rows={2} maxLength={2000} value={messageText} onChange={(event) => setMessageText(event.target.value)} /></label>
       </div>
+      <input type="hidden" name="message" value={[`${copy.country}: ${countries.find((item) => item.code === country)?.name || country}`, `${copy.language}: ${localeNames[preferredLanguage]}`, `${copy.objective}: ${objective}`, `${copy.budget}: ${options.find((item) => item.id === budget)?.label || ""}`, `${copy.timeline}: ${timeline}`, `${copy.message}: ${messageText || "-"}`].join("\n")} readOnly />
       <label className="consent"><input name="consent" type="checkbox" value="yes" required /><span>{copy.consent} {copy.privacy} <a href="https://convivaengenharia.com.br/politicas/" target="_blank" rel="noreferrer">{copy.privacyLink}</a>.</span></label>
       <div className="form-submit-row"><button className="button button-dark" type="submit" disabled={state === "sending" || rateLoading}>{state === "sending" ? copy.sending : copy.submit}<span aria-hidden="true">→</span></button><p className={`form-status ${state}`} role="status" aria-live="polite">{message}</p></div>
     </form>

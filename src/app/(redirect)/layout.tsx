@@ -4,7 +4,7 @@ import "../globals.css";
 export const metadata: Metadata = {
   title: "Conviva",
   description: "Contemporary residences on the coast of Niteroi, Brazil.",
-  icons: { icon: "/images/favicon.webp" },
+  icons: { icon: "/images/logo.png" },
 };
 
 export default function RedirectLayout({ children }: { children: React.ReactNode }) {

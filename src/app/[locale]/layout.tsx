@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Omit<LayoutProps, "children">
     metadataBase: new URL(baseUrl),
     title: copy.meta.title,
     description: copy.meta.description,
-    icons: { icon: "/images/favicon.webp" },
+    icons: { icon: "/images/logo.png" },
     alternates: { canonical: `/${locale}`, languages: { "x-default": "/en", ...languages } },
     openGraph: { title: copy.meta.title, description: copy.meta.description, type: "website", locale, url: `/${locale}`, siteName: "Conviva", images: [{ url: "/images/residences/brise-1.webp", width: 1800, height: 1200, alt: copy.residences[0].alt }] },
     robots: { index: true, follow: true },
