@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { AsYouType, getCountryCallingCode, getExampleNumber, parsePhoneNumberFromString, type CountryCode } from "libphonenumber-js";
 import examples from "libphonenumber-js/mobile/examples";
 import type { Dictionary, Locale, Residence } from "@/lib/i18n";
@@ -10,9 +10,17 @@ import { budgetOptions, currencyForCountry, internationalCopy } from "@/lib/inte
 
 type FormState = "idle" | "sending" | "success" | "error" | "unavailable";
 
+function normalizeCountrySearch(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
 export function ContactForm({ copy, locale, residences, countries, selectedResidence }: { copy: Dictionary["contact"]; locale: Locale; residences: Residence[]; countries: { code: CountryCode; name: string }[]; selectedResidence?: string }) {
   const [state, setState] = useState<FormState>("idle");
   const [country, setCountry] = useState<CountryCode | "">("");
+  const [countryQuery, setCountryQuery] = useState("");
+  const [countryOpen, setCountryOpen] = useState(false);
+  const [countryActiveIndex, setCountryActiveIndex] = useState(0);
+  const autoCountryInitialized = useRef(false);
   const [phone, setPhone] = useState("");
   const [budget, setBudget] = useState("");
   const [quote, setQuote] = useState<{ currency: string; rate: number; date: string | null; failed?: boolean }>({ currency: "BRL", rate: 1, date: null });
@@ -25,6 +33,26 @@ export function ContactForm({ copy, locale, residences, countries, selectedResid
   const rate = displayCurrency === "BRL" ? 1 : quote.rate;
   const options = budgetOptions(locale, displayCurrency, rate);
   const phonePlaceholder = country ? getExampleNumber(country, examples)?.formatInternational() : "+55 11 96123-4567";
+  const filteredCountries = useMemo(() => {
+    const query = normalizeCountrySearch(countryQuery);
+    if (!query) return countries;
+    return countries.filter((item) => normalizeCountrySearch(`${item.name} ${item.code}`).includes(query));
+  }, [countries, countryQuery]);
+
+  useEffect(() => {
+    if (autoCountryInitialized.current || country || typeof navigator === "undefined") return;
+    autoCountryInitialized.current = true;
+    const language = navigator.language || "";
+    const [languageCode, region] = language.split("-");
+    const languageDefaults: Record<string, CountryCode> = { pt: "BR", en: "US", es: "ES", de: "DE", fr: "FR", it: "IT", ja: "JP", zh: "CN" };
+    const preferredCode = (region?.length === 2 ? region.toUpperCase() : languageDefaults[languageCode]) as CountryCode | undefined;
+    const match = countries.find((item) => item.code === preferredCode);
+    if (match) {
+      setCountry(match.code);
+      setCountryQuery(match.name);
+      setPhone(`+${getCountryCallingCode(match.code)}`);
+    }
+  }, [countries, country]);
 
   useEffect(() => {
     if (currency === "BRL") return;
@@ -46,6 +74,8 @@ export function ContactForm({ copy, locale, residences, countries, selectedResid
     const parsedPhone = parsePhoneNumberFromString(phone, country || undefined);
     const phoneInput = form.elements.namedItem("phone") as HTMLInputElement;
     phoneInput.setCustomValidity(parsedPhone?.isPossible() ? "" : international.phoneError);
+    const countryInput = form.elements.namedItem("country-search") as HTMLInputElement;
+    countryInput.setCustomValidity(country ? "" : copy.select);
     if (!form.checkValidity()) { form.reportValidity(); return; }
     if (rateLoading) return;
     setState("sending");
@@ -61,7 +91,7 @@ export function ContactForm({ copy, locale, residences, countries, selectedResid
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, ...attribution, country: countryName, countryCode: country, phone: parsedPhone!.number, budget: selectedBudget?.label, budgetBand: budget, budgetCurrency: displayCurrency, budgetBaseCurrency: "BRL", budgetMinBRL: selectedBudget?.min, budgetMaxBRL: selectedBudget?.max, exchangeRate: rate, exchangeRateDate: displayCurrency === "BRL" ? null : quote.date, locale, residenceStatus: residence?.status || "", originUrl: window.location.href, referrer: document.referrer, submittedAt: new Date().toISOString(), formVersion: "international-v2" }),
       });
-      if (response.ok) { setState("success"); form.reset(); setCountry(""); setPhone(""); setBudget(""); }
+      if (response.ok) { setState("success"); form.reset(); setCountry(""); setCountryQuery(""); setPhone(""); setBudget(""); }
       else { const result = await response.json().catch(() => null); setState(result?.error === "contact_unavailable" ? "unavailable" : "error"); }
     } catch { setState("error"); }
   }
@@ -73,13 +103,31 @@ export function ContactForm({ copy, locale, residences, countries, selectedResid
       <div className="form-grid">
         <label>{copy.name}<input name="name" autoComplete="name" minLength={2} required /></label>
         <label>{copy.email}<input name="email" type="email" autoComplete="email" required /></label>
-        <label>{copy.country}<select name="country" autoComplete="country" value={country} required onChange={(event) => {
-          const nextCountry = event.target.value as CountryCode | "";
-          setCountry(nextCountry);
-          setPhone(nextCountry ? `+${getCountryCallingCode(nextCountry)}` : "");
-          const input = event.currentTarget.form?.elements.namedItem("phone") as HTMLInputElement | null;
-          input?.setCustomValidity("");
-        }}><option value="">{copy.select}</option>{countries.map((item) => <option key={item.code} value={item.code}>{item.name}</option>)}</select></label>
+        <label className="country-field">{copy.country}<div className="country-combobox">
+          <input name="country-search" type="text" role="combobox" aria-autocomplete="list" aria-controls="country-options" aria-expanded={countryOpen} autoComplete="country-name" placeholder={copy.select} value={countryQuery} required onFocus={() => { setCountryOpen(true); setCountryActiveIndex(0); }} onBlur={(event) => {
+            window.setTimeout(() => setCountryOpen(false), 120);
+            if (!country) event.currentTarget.setCustomValidity(copy.select);
+          }} onChange={(event) => {
+            const nextQuery = event.target.value;
+            const exact = countries.find((item) => normalizeCountrySearch(item.name) === normalizeCountrySearch(nextQuery) || item.code.toLowerCase() === nextQuery.trim().toLowerCase());
+            setCountryQuery(nextQuery);
+            setCountryOpen(true);
+            setCountryActiveIndex(0);
+            setCountry(exact?.code || "");
+            setPhone(exact ? `+${getCountryCallingCode(exact.code)}` : "");
+            event.currentTarget.setCustomValidity(exact ? "" : copy.select);
+            const phoneInput = event.currentTarget.form?.elements.namedItem("phone") as HTMLInputElement | null;
+            phoneInput?.setCustomValidity("");
+          }} onKeyDown={(event) => {
+            if (!countryOpen && (event.key === "ArrowDown" || event.key === "Enter")) { setCountryOpen(true); return; }
+            if (event.key === "ArrowDown") { event.preventDefault(); setCountryActiveIndex((index) => Math.min(index + 1, filteredCountries.length - 1)); }
+            if (event.key === "ArrowUp") { event.preventDefault(); setCountryActiveIndex((index) => Math.max(index - 1, 0)); }
+            if (event.key === "Enter" && filteredCountries[countryActiveIndex]) { event.preventDefault(); const nextCountry = filteredCountries[countryActiveIndex]; setCountry(nextCountry.code); setCountryQuery(nextCountry.name); setPhone(`+${getCountryCallingCode(nextCountry.code)}`); setCountryOpen(false); event.currentTarget.setCustomValidity(""); }
+            if (event.key === "Escape") setCountryOpen(false);
+          }} />
+          <input type="hidden" name="country" value={country} />
+          {countryOpen && filteredCountries.length > 0 && <div className="country-options" id="country-options" role="listbox">{filteredCountries.slice(0, 12).map((item, index) => <button type="button" role="option" aria-selected={item.code === country} className={index === countryActiveIndex ? "is-active" : ""} key={item.code} onMouseDown={(event) => event.preventDefault()} onClick={(event) => { const input = event.currentTarget.form?.elements.namedItem("country-search") as HTMLInputElement | null; setCountry(item.code); setCountryQuery(item.name); setPhone(`+${getCountryCallingCode(item.code)}`); setCountryOpen(false); input?.setCustomValidity(""); }}>{item.name}</button>)}</div>}
+        </div></label>
         <label>{copy.phone}<input name="phone" type="tel" inputMode="tel" autoComplete="tel" value={phone} placeholder={phonePlaceholder} disabled={!country} required maxLength={32} onChange={(event) => {
           event.currentTarget.setCustomValidity("");
           const value = event.target.value;

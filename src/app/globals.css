@@ -186,6 +186,10 @@ h2 { margin-bottom: 0; font-family: var(--display); font-size: clamp(2.65rem, 5.
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 12px 22px; }
 .contact-form label { display: grid; min-width: 0; gap: 4px; font-size: .75rem; font-weight: 750; letter-spacing: .02em; text-transform: uppercase; }
 .contact-form input, .contact-form select, .contact-form textarea { width: 100%; min-width: 0; min-height: 40px; border: 0; border-bottom: 1px solid rgba(7,24,22,.58); border-radius: 0; padding: 6px 0; background: transparent; color: var(--night); outline: 0; font-size: .875rem; font-weight: 500; letter-spacing: normal; }
+.country-combobox { position: relative; }
+.country-options { position: absolute; z-index: 5; top: calc(100% + 6px); right: 0; left: 0; max-height: 230px; overflow-y: auto; border: 1px solid var(--line); background: var(--bg); box-shadow: 0 16px 32px rgba(7,24,22,.16); }
+.country-options button { display: block; width: 100%; border: 0; padding: 10px 12px; background: transparent; color: var(--ink); cursor: pointer; font-size: .875rem; text-align: left; }
+.country-options button:hover, .country-options button.is-active { background: rgba(24,138,116,.12); }
 .contact-form select { color-scheme: light; text-overflow: ellipsis; }
 .contact-form input:disabled, .contact-form select:disabled { opacity: .55; cursor: not-allowed; }
 .contact-form .field-hint { font-size: .75rem; font-weight: 400; line-height: 1.35; text-transform: none; letter-spacing: normal; }
